@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity version="0.8.5.0" processorArchitecture="amd64" name="Orbit.Launcher" type="win32"/>
+  <assemblyIdentity version="0.8.7.0" processorArchitecture="amd64" name="Orbit.Launcher" type="win32"/>
   <description>Orbit Launcher</description>
   <dependency>
     <dependentAssembly>

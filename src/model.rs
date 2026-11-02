@@ -78,9 +78,17 @@ pub struct Settings {
     pub app_columns: usize,
     pub folder_rows: usize,
     pub folder_columns: usize,
+    pub ui_scale: String,
     #[serde(flatten)]
     pub extra: Extra,
 }
+impl Settings {
+    /// Fixed UI size in percent; `None` follows the display.
+    pub fn ui_scale_percent(&self) -> Option<u32> {
+        self.ui_scale.parse().ok()
+    }
+}
+pub const UI_SCALES: [&str; 7] = ["auto", "75", "100", "125", "150", "175", "200"];
 impl Default for Settings {
     fn default() -> Self {
         Self {
@@ -102,6 +110,7 @@ impl Default for Settings {
             app_columns: 6,
             folder_rows: 2,
             folder_columns: 6,
+            ui_scale: "auto".into(),
             extra: Extra::new(),
         }
     }
@@ -146,6 +155,9 @@ impl Entry {
     pub fn label(&self, en: bool) -> String {
         let path = expand(&self.target);
         if self.kind == "folder" {
+            if !self.name.trim().is_empty() {
+                return self.name.clone();
+            }
             return path
                 .trim_end_matches(['\\', '/'])
                 .rsplit(['\\', '/'])
@@ -187,6 +199,17 @@ impl Entry {
         }
         self.name.clone()
     }
+}
+/// Name given to an entry registered by dropping `path`. A dot in a folder name
+/// is not an extension, so folders keep their whole name.
+pub fn dropped_name(path: &str, kind: &str) -> String {
+    let path = std::path::Path::new(path);
+    let name = if kind == "folder" {
+        path.file_name()
+    } else {
+        path.file_stem()
+    };
+    name.unwrap_or_default().to_string_lossy().into_owned()
 }
 pub fn expand(path: &str) -> String {
     let mut result = path.to_string();
@@ -325,6 +348,10 @@ impl Config {
             (
                 (8..=16).contains(&s.folder_font_px),
                 "Folder font size (px) must be between 8 and 16 / フォルダ文字サイズ（px）は8〜16の範囲で入力してください",
+            ),
+            (
+                UI_SCALES.contains(&s.ui_scale.as_str()),
+                "UI scale must be auto, 75, 100, 125, 150, 175 or 200 / UIの大きさはauto、75、100、125、150、175、200のいずれかを指定してください",
             ),
             (
                 ["ja", "en"].contains(&s.language.as_str()),
@@ -637,6 +664,66 @@ mod tests {
         assert_eq!(c.pages[0].items[0].cell, Some([1, 5]));
         c.settings.app_rows = 1;
         assert!(c.normalize().is_err());
+    }
+    #[test]
+    fn ui_scale_defaults_to_auto_and_old_files_load() {
+        let settings: Settings = serde_json::from_str("{}").unwrap();
+        assert_eq!(settings.ui_scale, "auto");
+        assert_eq!(settings.ui_scale_percent(), None);
+    }
+    #[test]
+    fn ui_scale_accepts_only_the_listed_values() {
+        for value in UI_SCALES {
+            let mut c = Config::default();
+            c.settings.ui_scale = value.into();
+            assert!(c.normalize().is_ok(), "{value}");
+        }
+        for value in ["", "0", "130", "1000", "AUTO", "150%"] {
+            let mut c = Config::default();
+            c.settings.ui_scale = value.into();
+            assert!(c.normalize().is_err(), "{value}");
+        }
+    }
+    #[test]
+    fn folder_shows_its_registered_name() {
+        let mut e = Entry::new("仕事", r"C:\Example\Work.Files\", "folder");
+        assert_eq!(e.label(true), "仕事");
+        assert_eq!(e.label(false), "仕事");
+        e.name = "Other".into();
+        assert_eq!(e.label(true), "Other");
+    }
+    #[test]
+    fn folder_with_blank_name_falls_back_to_its_folder_name() {
+        let mut e = Entry::new("", r"C:\Example\Work.Files\", "folder");
+        assert_eq!(e.label(true), "Work.Files");
+        e.name = "   ".into();
+        assert_eq!(e.label(true), "Work.Files");
+        e.target = r"C:\".into();
+        e.name.clear();
+        assert_eq!(e.label(true), "C:");
+    }
+    #[test]
+    fn folder_name_is_not_translated_like_a_windows_app() {
+        let e = Entry::new("メモ帳", r"C:\Windows\System32\notepad.exe", "folder");
+        assert_eq!(e.label(true), "メモ帳");
+    }
+    #[test]
+    fn dropped_folder_keeps_the_dot_in_its_name() {
+        assert_eq!(
+            dropped_name(r"C:\Example\Work.Files", "folder"),
+            "Work.Files"
+        );
+        assert_eq!(
+            dropped_name(r"C:\Example\Work.Files\", "folder"),
+            "Work.Files"
+        );
+        assert_eq!(dropped_name(r"\\server\share\v1.2", "folder"), "v1.2");
+        assert_eq!(dropped_name(r"C:\", "folder"), "");
+    }
+    #[test]
+    fn dropped_file_still_loses_its_extension() {
+        assert_eq!(dropped_name(r"C:\Example\tool.exe", "launch"), "tool");
+        assert_eq!(dropped_name(r"C:\Example\a.b.lnk", "launch"), "a.b");
     }
     #[test]
     fn custom_names_are_never_translated() {

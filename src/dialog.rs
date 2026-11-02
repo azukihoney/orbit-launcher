@@ -171,11 +171,13 @@ impl Dialog {
         // Keep established control IDs stable when adding the optional appearance row.
         let field_id = if key == "app_icon_only" {
             199
+        } else if key == "ui_scale" {
+            198
         } else {
             100 + self
                 .fields
                 .iter()
-                .filter(|field| field.key != "app_icon_only")
+                .filter(|field| field.key != "app_icon_only" && field.key != "ui_scale")
                 .count()
         };
         let label_control = self.child(parent, "STATIC", label, 0, R::new(16, y + 6, 210, 22), 0);
@@ -736,6 +738,21 @@ pub fn open(app: &mut App, mode: Mode) {
                             "Folder font size (px)",
                             Kind::Integer,
                             vec![],
+                        ),
+                        (
+                            "ui_scale",
+                            "UIの大きさ",
+                            "UI scale",
+                            Kind::Choice(crate::model::UI_SCALES.to_vec()),
+                            vec![
+                                app.tr("自動（ディスプレイに合わせる）", "Auto (follow display)"),
+                                "75%",
+                                "100%",
+                                "125%",
+                                "150%",
+                                "175%",
+                                "200%",
+                            ],
                         ),
                         (
                             "theme",

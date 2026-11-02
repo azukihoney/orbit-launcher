@@ -8,6 +8,9 @@ pub const TOP_MARGIN: i32 = 10;
 pub const BOTTOM_MARGIN: i32 = 10;
 pub const DIVIDER_GAP: i32 = 3;
 pub const FOLDER_GAP: i32 = 4;
+const GRID_SLACK: i32 = 14;
+/// Smallest DPI a fixed UI scale may shrink to while fitting the work area.
+pub const MIN_FIXED_DPI: u32 = 48;
 pub const HEIGHT_BUDGET_DEDUCTION: i32 = TOP_MARGIN + DIVIDER_GAP + FOLDER_GAP + BOTTOM_MARGIN - 4;
 pub fn step(common: bool) -> i32 {
     if common { FOLDER_STEP } else { APP_STEP }
@@ -17,6 +20,24 @@ pub fn wanted(rows: usize, common: bool) -> i32 {
 }
 pub fn card(cell: R) -> R {
     cell.inset(CARD_INSET)
+}
+fn window_width(s: &Settings) -> i32 {
+    (s.app_columns as i32 * APP_STEP + GRID_SLACK)
+        .max(s.folder_columns as i32 * FOLDER_STEP + GRID_SLACK + 56)
+        + 2 * SIDE_MARGIN
+}
+/// DPI the UI is drawn at. `auto` returns the display's DPI untouched; a fixed
+/// scale ignores it, shrinking only as far as needed to fit the work area.
+pub fn ui_dpi(s: &Settings, work: RECT, display_dpi: u32) -> u32 {
+    let Some(percent) = s.ui_scale_percent() else {
+        return display_dpi;
+    };
+    let wanted = percent * 96 / 100;
+    let available = (work.right - work.left).max(0) as i64;
+    let fit = available * 96 / window_width(s) as i64;
+    wanted
+        .min(fit.min(u32::MAX as i64) as u32)
+        .max(MIN_FIXED_DPI)
 }
 pub fn calculate(s: &Settings, pages: usize, work: RECT, dpi: u32) -> Layout {
     let scale = dpi as f64 / 96.;
@@ -31,9 +52,7 @@ pub fn calculate(s: &Settings, pages: usize, work: RECT, dpi: u32) -> Layout {
     } else {
         (wanted_app, wanted_folder.max(132))
     };
-    let width = (s.app_columns as i32 * APP_STEP + 14)
-        .max(s.folder_columns as i32 * FOLDER_STEP + 14 + 56)
-        + 2 * SIDE_MARGIN;
+    let width = window_width(s);
     let app_y = TOP_MARGIN + tabs;
     let divider = app_y + app_h + DIVIDER_GAP;
     let folder_y = divider + FOLDER_GAP;
@@ -48,8 +67,9 @@ pub fn calculate(s: &Settings, pages: usize, work: RECT, dpi: u32) -> Layout {
             folder_h,
         ),
         divider,
+        // Anchored to the window, not the app grid: folders can decide the width.
         controls: R::new(
-            SIDE_MARGIN + (s.app_columns as i32 - 2) * APP_STEP,
+            width - SIDE_MARGIN - GRID_SLACK - 2 * APP_STEP,
             app_y,
             2 * APP_STEP,
             APP_STEP,

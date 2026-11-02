@@ -1,4 +1,4 @@
-Orbit Launcher 0.8.5 — Rust / Win32
+Orbit Launcher 0.8.7 — Rust / Win32
 
 Windows 11 x64向け。orbit-launcher.exeを起動してください。
 Rust・Python・Qtの導入は不要です。

@@ -34,6 +34,8 @@ pub const ADD_FOLDER: usize = 102;
 pub const ADD_PAGE: usize = 103;
 pub const RENAME_PAGE: usize = 104;
 pub const REMOVE_PAGE: usize = 105;
+// Whole pixel font sizes can outgrow the fixed title boxes at small UI scales.
+const TITLE_TEXT: u32 = DT_RIGHT | DT_SINGLELINE | DT_NOCLIP;
 pub const QUIT: usize = 107;
 pub const GESTURE: usize = 108;
 pub const OPEN_FILE_LOCATION: usize = 204;
@@ -71,6 +73,7 @@ pub struct App {
     pub dialog: HWND,
     pub pinned: bool,
     pub scale: f64,
+    fixed_scale: bool,
     pub fonts: Fonts,
     pub layout: Layout,
     pub context: Option<(bool, Option<usize>, Option<[usize; 2]>)>,
@@ -172,21 +175,18 @@ impl App {
             } else {
                 None
             };
-            self.scale = dpi.value as f64 / 96.;
             let work = os::work_area(self.hwnd);
+            let ui_dpi = crate::geometry::ui_dpi(&self.config.settings, work, dpi.value);
+            self.scale = ui_dpi as f64 / 96.;
             let layout = crate::geometry::calculate(
                 &self.config.settings,
                 self.config.pages.len(),
                 work,
-                dpi.value,
+                ui_dpi,
             );
             if let Some(plan) = dpi.reveal {
-                let rect = crate::geometry::place(
-                    &layout,
-                    (plan.cursor.x, plan.cursor.y),
-                    work,
-                    dpi.value,
-                );
+                let rect =
+                    crate::geometry::place(&layout, (plan.cursor.x, plan.cursor.y), work, ui_dpi);
                 self.install_layout(layout, false);
                 unsafe {
                     SetWindowPos(
@@ -391,6 +391,7 @@ impl App {
             dialog: null_mut(),
             pinned: false,
             scale: 1.,
+            fixed_scale: false,
             fonts,
             layout: initial_layout,
             context: None,
@@ -437,6 +438,16 @@ impl App {
     }
     pub fn relayout(&mut self) {
         let work = os::work_area(self.hwnd);
+        let fixed = self.config.settings.ui_scale_percent().is_some();
+        let old_scale = self.scale;
+        // Auto keeps its own DPI bookkeeping; only a fixed scale, or leaving one,
+        // has to look the display up again.
+        if fixed || self.fixed_scale {
+            let dpi =
+                crate::geometry::ui_dpi(&self.config.settings, work, os::window_dpi(self.hwnd));
+            self.scale = dpi as f64 / 96.;
+        }
+        self.fixed_scale = fixed;
         let layout = crate::geometry::calculate(
             &self.config.settings,
             self.config.pages.len(),
@@ -444,6 +455,27 @@ impl App {
             self.current_dpi(),
         );
         self.install_layout(layout, true);
+        if old_scale != self.scale {
+            self.keep_on_screen(work);
+        }
+    }
+    fn keep_on_screen(&self, work: RECT) {
+        let mut rect = RECT::default();
+        unsafe {
+            if GetWindowRect(self.hwnd, &mut rect) != 0 {
+                let width = rect.right - rect.left;
+                let height = rect.bottom - rect.top;
+                SetWindowPos(
+                    self.hwnd,
+                    null_mut(),
+                    rect.left.min(work.right - width).max(work.left),
+                    rect.top.min(work.bottom - height).max(work.top),
+                    0,
+                    0,
+                    SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE,
+                );
+            }
+        }
     }
     fn install_layout(&mut self, layout: Layout, resize: bool) {
         self.hide_tooltip();
@@ -554,7 +586,11 @@ impl App {
                 cursor = crate::stage3_probe::cursor(cursor);
             }
             let (work, queried_dpi) = os::cursor_monitor(cursor);
-            let dpi = queried_dpi.unwrap_or_else(|| self.current_dpi());
+            let dpi = crate::geometry::ui_dpi(
+                &self.config.settings,
+                work,
+                queried_dpi.unwrap_or_else(|| self.current_dpi()),
+            );
             let layout = crate::geometry::calculate(
                 &self.config.settings,
                 self.config.pages.len(),
@@ -856,22 +892,19 @@ impl App {
                         rr(R::new(end - 43, r.y + 7, 43, 17)),
                         &self.fonts.quiet,
                         p.quiet,
-                        DT_RIGHT | DT_SINGLELINE,
+                        TITLE_TEXT,
                     );
                     c.text(
                         "Launcher",
                         rr(R::new(end - 97, r.y + 7, 49, 17)),
                         &self.fonts.quiet,
                         p.quiet,
-                        DT_RIGHT | DT_SINGLELINE,
+                        TITLE_TEXT,
                     );
-                    c.text(
-                        "orbit",
-                        rr(R::new(end - 137, r.y + 7, 35, 17)),
-                        &self.fonts.brand,
-                        p.text,
-                        DT_RIGHT | DT_SINGLELINE,
-                    );
+                    // Top-aligned text of two sizes: share a baseline with "Launcher".
+                    let mut brand_box = rr(R::new(end - 137, r.y + 7, 35, 17));
+                    brand_box.y += c.ascent(&self.fonts.quiet) - c.ascent(&self.fonts.brand);
+                    c.text("orbit", brand_box, &self.fonts.brand, p.text, TITLE_TEXT);
                     for (id, r) in self
                         .tool_rects()
                         .into_iter()
@@ -1608,10 +1641,7 @@ impl App {
                 } else {
                     "launch"
                 };
-                let name = std::path::Path::new(&path)
-                    .file_stem()
-                    .unwrap_or_default()
-                    .to_string_lossy();
+                let name = crate::model::dropped_name(&path, kind);
                 let mut e = Entry::new(&name, &path, kind);
                 if i == 0 {
                     e.cell = cell;

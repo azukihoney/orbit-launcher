@@ -133,6 +133,9 @@ impl Drop for GdiPlus {
 pub struct Font(pub HFONT);
 impl Font {
     pub fn new(name: &str, px: i32, bold: bool) -> Self {
+        Self::weighted(name, px, if bold { 600 } else { 400 })
+    }
+    pub fn weighted(name: &str, px: i32, weight: i32) -> Self {
         let face = font_face(name);
         #[cfg(feature = "review-test")]
         crate::stage2_probe::font("create_font", &face);
@@ -142,7 +145,7 @@ impl Font {
                 0,
                 0,
                 0,
-                if bold { 600 } else { 400 },
+                weight,
                 0,
                 0,
                 0,
@@ -180,7 +183,13 @@ impl Fonts {
             ui: Font::new(&s.font_family, px(12), false),
             tool_glyph: Font::new(&s.font_family, px(18), false),
             quiet: Font::new(&s.font_family, px(11), false),
-            brand: Font::new(&s.font_family, px(12), true),
+            brand: if scale < 1. {
+                // Weight 600 is emboldened by GDI, one pixel per character: too
+                // wide and smeared at small sizes. A real bold keeps its shape.
+                Font::weighted(&s.font_family, px(12), 700)
+            } else {
+                Font::new(&s.font_family, px(12), true)
+            },
         }
     }
 }
@@ -278,6 +287,15 @@ impl Canvas {
             GdipCreatePen1(color, width, UnitPixel, &mut pen);
             GdipDrawLine(self.graphics, pen, x1, y1, x2, y2);
             GdipDeletePen(pen);
+        }
+    }
+    pub fn ascent(&self, font: &Font) -> i32 {
+        unsafe {
+            let old = SelectObject(self.dc, font.0);
+            let mut metrics: TEXTMETRICW = std::mem::zeroed();
+            let found = GetTextMetricsW(self.dc, &mut metrics) != 0;
+            SelectObject(self.dc, old);
+            if found { metrics.tmAscent } else { 0 }
         }
     }
     pub fn text(&self, text: &str, r: R, font: &Font, color: u32, flags: u32) {
