@@ -1,0 +1,6 @@
+# Keep line endings independent of each clone's core.autocrlf.
+* text=auto eol=lf
+# cmd.exe can misread labels and blocks in LF-only batch files.
+*.cmd text eol=crlf
+*.png binary
+*.ico binary

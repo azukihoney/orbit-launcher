@@ -1,0 +1,7 @@
+target/
+data/
+_checks/
+dist/
+*.log
+/orbit-launcher.exe
+__pycache__/

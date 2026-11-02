@@ -1,0 +1,326 @@
+{
+  "geometry_left_edge": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    }
+  },
+  "geometry_left_bottom": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    }
+  },
+  "geometry_right_edge": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.25,
+      "width": 506
+    }
+  },
+  "geometry_above": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    }
+  },
+  "geometry_below": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    }
+  },
+  "geometry_mixed_dpi": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 2.0,
+      "width": 506
+    }
+  },
+  "reveal_dpi_then_normal_change": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 2.0,
+      "width": 506
+    }
+  },
+  "dpi_notice_during_reveal": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    }
+  },
+  "layout_default": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    }
+  },
+  "layout_tall": {
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        312
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 325,
+      "folders": [
+        12,
+        329,
+        426,
+        209
+      ],
+      "height": 548,
+      "rail": 450,
+      "scale": 1.25,
+      "width": 506
+    }
+  },
+  "layout_pages": {
+    "expected_layout": {
+      "apps": [
+        12,
+        44,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        44,
+        156,
+        78
+      ],
+      "divider": 207,
+      "folders": [
+        12,
+        211,
+        426,
+        132
+      ],
+      "height": 353,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    }
+  },
+  "relayout_window_monitor": {
+    "after_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        327
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 340,
+      "folders": [
+        12,
+        344,
+        426,
+        218
+      ],
+      "height": 572,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    }
+  }
+}

@@ -1,0 +1,514 @@
+[
+  {
+    "name": "geometry_left_edge",
+    "fixture": {
+      "window_work": [
+        -1600,
+        0,
+        0,
+        900
+      ],
+      "cursor_work": [
+        -1600,
+        0,
+        0,
+        900
+      ],
+      "cursor": [
+        -1599,
+        50
+      ],
+      "initial_dpi": 96,
+      "target_dpi": 96
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    },
+    "expected_rect": [
+      -1600,
+      0,
+      506,
+      319
+    ]
+  },
+  {
+    "name": "geometry_left_bottom",
+    "fixture": {
+      "window_work": [
+        -1600,
+        0,
+        0,
+        900
+      ],
+      "cursor_work": [
+        -1600,
+        0,
+        0,
+        900
+      ],
+      "cursor": [
+        -1,
+        899
+      ],
+      "initial_dpi": 144,
+      "target_dpi": 144
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    },
+    "expected_rect": [
+      -759,
+      421,
+      759,
+      479
+    ]
+  },
+  {
+    "name": "geometry_right_edge",
+    "fixture": {
+      "window_work": [
+        1920,
+        0,
+        3840,
+        1080
+      ],
+      "cursor_work": [
+        1920,
+        0,
+        3840,
+        1080
+      ],
+      "cursor": [
+        3839,
+        1079
+      ],
+      "initial_dpi": 120,
+      "target_dpi": 120
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.25,
+      "width": 506
+    },
+    "expected_rect": [
+      3207,
+      681,
+      633,
+      399
+    ]
+  },
+  {
+    "name": "geometry_above",
+    "fixture": {
+      "window_work": [
+        -1920,
+        -1080,
+        0,
+        0
+      ],
+      "cursor_work": [
+        -1920,
+        -1080,
+        0,
+        0
+      ],
+      "cursor": [
+        -1919,
+        -1079
+      ],
+      "initial_dpi": 144,
+      "target_dpi": 144
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    },
+    "expected_rect": [
+      -1920,
+      -1080,
+      759,
+      479
+    ]
+  },
+  {
+    "name": "geometry_below",
+    "fixture": {
+      "window_work": [
+        0,
+        1080,
+        1920,
+        2160
+      ],
+      "cursor_work": [
+        0,
+        1080,
+        1920,
+        2160
+      ],
+      "cursor": [
+        1919,
+        2159
+      ],
+      "initial_dpi": 96,
+      "target_dpi": 96
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    },
+    "expected_rect": [
+      1414,
+      1841,
+      506,
+      319
+    ]
+  },
+  {
+    "name": "geometry_mixed_dpi",
+    "fixture": {
+      "window_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor": [
+        1900,
+        1000
+      ],
+      "initial_dpi": 192,
+      "target_dpi": 192
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 2.0,
+      "width": 506
+    },
+    "expected_rect": [
+      908,
+      442,
+      1012,
+      638
+    ]
+  },
+  {
+    "name": "reveal_dpi_then_normal_change",
+    "fixture": {
+      "window_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor": [
+        1900,
+        1000
+      ],
+      "initial_dpi": 192,
+      "target_dpi": 192
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 2.0,
+      "width": 506
+    },
+    "expected_rect": [
+      908,
+      442,
+      1012,
+      638
+    ]
+  },
+  {
+    "name": "layout_default",
+    "fixture": {
+      "window_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "initial_dpi": 96,
+      "target_dpi": 96
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 173,
+      "folders": [
+        12,
+        177,
+        426,
+        132
+      ],
+      "height": 319,
+      "rail": 450,
+      "scale": 1.0,
+      "width": 506
+    }
+  },
+  {
+    "name": "layout_tall",
+    "fixture": {
+      "window_work": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "cursor_work": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "initial_dpi": 120,
+      "target_dpi": 120,
+      "rows": 16
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        10,
+        482,
+        312
+      ],
+      "controls": [
+        324,
+        10,
+        156,
+        78
+      ],
+      "divider": 325,
+      "folders": [
+        12,
+        329,
+        426,
+        209
+      ],
+      "height": 548,
+      "rail": 450,
+      "scale": 1.25,
+      "width": 506
+    }
+  },
+  {
+    "name": "layout_pages",
+    "fixture": {
+      "window_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "cursor_work": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "initial_dpi": 144,
+      "target_dpi": 144,
+      "pages": 3
+    },
+    "expected_layout": {
+      "apps": [
+        12,
+        44,
+        482,
+        160
+      ],
+      "controls": [
+        324,
+        44,
+        156,
+        78
+      ],
+      "divider": 207,
+      "folders": [
+        12,
+        211,
+        426,
+        132
+      ],
+      "height": 353,
+      "rail": 450,
+      "scale": 1.5,
+      "width": 506
+    }
+  }
+]
