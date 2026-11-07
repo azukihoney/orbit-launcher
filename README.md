@@ -9,7 +9,7 @@ Apps are organized into pages; shared buttons stay available below them.
 - Requires Windows 11 x64.
 - Download `orbit-launcher-<version>-windows-x64.zip` from [Releases](https://github.com/azukihoney/orbit-launcher/releases).
 - Extract **all** files into a writable personal folder, then run `orbit-launcher.exe` or `start.cmd`.
-- The executable is unsigned; Windows SmartScreen or security software may show a warning.
+- Code signing through SignPath Foundation is planned, subject to approval and setup. Current releases are unsigned; Windows may block them or show a warning. See [Code signing policy](#code-signing-policy).
 - By default, draw 1.5 counterclockwise turns, or press `Ctrl+Alt+Space`.
 - Settings are stored beside the executable in `data/config.json`.
 - Orbit has no built-in internet communication or automatic updates.
@@ -36,9 +36,43 @@ Orbit は、マウスで円を描くかキーを押して呼び出す Windows �
 2. ZIP を右クリックして「すべて展開」を選び、書き込み可能な個人用フォルダへ展開します。ZIP の中から直接起動しないでください。
 3. 展開先の `orbit-launcher.exe` または `start.cmd` を実行します。
 
-実行ファイルには署名がありません。ダウンロードした ZIP から起動すると、SmartScreen の「Windows によって PC が保護されました」や「セキュリティの警告」が出ることがあります。入手元を確認したうえで、SmartScreen では「詳細情報」→「実行」で進めます。セキュリティソフトが警告することもあります。
+SignPath Foundation を利用したコード署名を準備中です。申請の承認と設定が完了するまでは、現在の配布ファイルは未署名です。Windows の設定によっては起動がブロックされたり、SmartScreen やセキュリティソフトの警告が出たりします。方針は [Code signing policy](#code-signing-policy) を参照してください。
 
 設定は exe と同じ場所の `data/config.json` に保存します。別の端末へ移すときは、登録先のパスやフォントの導入状況を移動先に合わせてください。
+
+## Code signing policy
+
+### Signing plan / 署名の方針
+
+Code signing through SignPath Foundation is planned; approval and production signing have not been completed. The intended process builds from this public repository on GitHub Actions and requires the maintainer's manual approval for each signing request. Publishing a release remains a manual step.
+
+SignPath Foundation によるコード署名を予定しています。承認・本番署名は未完了です。この公開リポジトリから GitHub Actions でビルドし、署名要求ごとにメンテナーが手動承認する方針です。Release への公開も人が行います。
+
+<!-- Draft attribution: publish only after approval and setup.
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org)
+-->
+
+### Team roles / 担当
+
+- Authors: [azukihoney](https://github.com/azukihoney)
+- Reviewers: [azukihoney](https://github.com/azukihoney)
+- Approvers: [azukihoney](https://github.com/azukihoney)
+
+These are the proposed roles for a single maintainer; acceptance of combined roles will be confirmed during application.
+
+単独メンテナーによる兼任を予定しています。兼任が認められるかは申請時に確認します。
+
+### Privacy / プライバシー
+
+Orbit has no built-in telemetry, HTTP client, or automatic updates. It stores settings and optional diagnostic captures in the settings folder. When you open a registered app, URL, or network location, Orbit asks Windows to open that target; Windows, the browser, or the launched app may then communicate with the network under its own privacy policy. Using a network folder for settings also involves Windows network file access.
+
+Orbit 自身には、テレメトリー送信・HTTP クライアント・自動更新の機能はありません。設定と任意で取得する診断データは設定フォルダへ保存します。利用者が登録したアプリ・URL・ネットワーク上の場所を開くと、Windows に処理を渡します。その先で Windows・ブラウザー・起動したアプリが通信する場合は、それぞれのプライバシー方針が適用されます。設定先をネットワークフォルダにした場合も、Windows によるネットワーク上のファイルへのアクセスが発生します。
+
+### System changes and removal / システム設定と消し方
+
+Orbit does not automatically change the registry or register itself for startup. Any app or script you launch can make its own system changes. To remove this portable app, exit Orbit and delete its extracted folder, including `data` if you no longer need the settings. Also delete any startup `.lnk` shortcut you created yourself. If you chose a separate settings folder, remove it separately when no longer needed.
+
+Orbit 自身はレジストリの変更やスタートアップへの自動登録を行いません。利用者が起動した別のアプリやスクリプトが行う変更は、そのプログラムの動作によります。削除するときは Orbit を終了し、展開したフォルダを削除します。設定が不要なら中の `data` も含めて削除してください。自分で作成したスタートアップの `.lnk` があれば、それも削除します。設定先を別に指定した場合は、不要になった設定フォルダも別途削除してください。
 
 ## 基本の使い方
 

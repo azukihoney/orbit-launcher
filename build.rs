@@ -18,11 +18,33 @@ fn main() {
         .last()
         .expect("Windows resource compiler")
         .join("x64/rc.exe");
-    let output = PathBuf::from(env::var("OUT_DIR").unwrap()).join("orbit.res");
+    // Cargo is the only version source; keep generated definitions out of the tree.
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let version = env::var("CARGO_PKG_VERSION").unwrap();
+    let numbers: Vec<u16> = ["MAJOR", "MINOR", "PATCH"]
+        .iter()
+        .map(|part| {
+            env::var(format!("CARGO_PKG_VERSION_{part}"))
+                .unwrap()
+                .parse()
+                .expect("Windows version component must fit in 16 bits")
+        })
+        .collect();
+    fs::write(
+        out_dir.join("orbit-version.h"),
+        format!(
+            "#define ORBIT_VERSION \"{version}\\0\"\n#define ORBIT_VERSION_NUM {},{},{},0\n",
+            numbers[0], numbers[1], numbers[2]
+        ),
+    )
+    .expect("Write Cargo version definitions");
+    let output = out_dir.join("orbit.res");
     assert!(
         Command::new(rc)
             .current_dir("resources")
             .arg("/nologo")
+            .arg("/I")
+            .arg(&out_dir)
             .arg("/fo")
             .arg(&output)
             .arg("orbit.rc")

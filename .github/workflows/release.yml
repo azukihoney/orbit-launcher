@@ -1,0 +1,132 @@
+name: Build and sign Windows release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag matching Cargo.toml (for example v0.8.7)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'azukihoney/orbit-launcher'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      RUSTUP_TOOLCHAIN: 1.99.1-x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate release tag and signing configuration
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+        run: |
+          python .github/scripts/release.py validate
+          if ($LASTEXITCODE -ne 0) { throw 'Release validation failed' }
+          foreach ($name in @('SIGNPATH_API_TOKEN', 'SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG', 'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw "Missing signing configuration: $name"
+            }
+          }
+
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup toolchain install $env:RUSTUP_TOOLCHAIN --profile minimal
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned Rust toolchain is unavailable' }
+          rustc --version
+          if ($LASTEXITCODE -ne 0) { throw 'rustc failed' }
+          cargo --version
+          if ($LASTEXITCODE -ne 0) { throw 'cargo failed' }
+
+      - name: Build and check unsigned executable
+        run: |
+          python tools/build_release.py
+          if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
+          python .github/scripts/release.py paths
+          if ($LASTEXITCODE -ne 0) { throw 'Builder paths found' }
+          & .github/scripts/verify-signature.ps1 -Binary orbit-launcher.exe -MetadataOnly
+
+      - name: Upload unsigned executable for SignPath
+        id: unsigned
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unsigned-orbit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: orbit-launcher.exe
+          archive: true
+          if-no-files-found: error
+
+      - name: Request signing and wait for manual approval
+        id: signpath
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed
+
+      - name: Record signing request even on timeout
+        if: ${{ always() && steps.signpath.outcome != 'skipped' }}
+        env:
+          REQUEST_ID: ${{ steps.signpath.outputs.signing-request-id }}
+          REQUEST_URL: ${{ steps.signpath.outputs.signing-request-web-url }}
+          SIGNING_OUTCOME: ${{ steps.signpath.outcome }}
+        run: |
+          @(
+            '## SignPath signing request'
+            "Outcome: $env:SIGNING_OUTCOME"
+            "Request ID: $env:REQUEST_ID"
+            "Request URL: $env:REQUEST_URL"
+            'On timeout, inspect this request in SignPath before manually re-running. This workflow does not recover or automatically re-submit requests.'
+            'If no ID/URL was returned, check the action log and SignPath before retrying.'
+          ) | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Encoding UTF8
+
+      - name: Verify signed executable
+        run: |
+          & .github/scripts/verify-signature.ps1 -Binary signed/orbit-launcher.exe
+          python .github/scripts/release.py paths --binary signed/orbit-launcher.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Builder paths found in signed executable' }
+
+      - name: Package verified signed executable
+        run: |
+          python .github/scripts/release.py package
+          if ($LASTEXITCODE -ne 0) { throw 'Signed release packaging failed' }
+
+      - name: Upload release files for manual publication
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-${{ env.RELEASE_TAG }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist/orbit-launcher-*-windows-x64.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
